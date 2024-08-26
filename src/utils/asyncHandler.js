@@ -11,9 +11,9 @@
 // }
 
 const asyncHandler=(reqFun)=>{
-    (err,req,res,nex)=>{
-        Promise.resolve(reqFun(err,req,res,nex))
-        .reject((error)=>nex(error))
+    return (req,res,nex)=>{
+        Promise.resolve(reqFun(req,res,nex))
+        .catch((error)=>nex(error))
     }
 }
 
