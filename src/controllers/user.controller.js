@@ -186,8 +186,31 @@ const RefreshAccessToken=asyncHandler(async(req,res)=>{
    }
 })
 
+const changeUsersPassword=asyncHandler(async(req,res)=>{
+   const {oldPassword,newPassword,confirmPassword}=req.body;
+   // console.log(oldPassword,newPassword);
+
+   if([oldPassword,newPassword,confirmPassword].some((field)=>field?.trim==="")){
+      throw new ApiError("all field are required")
+   }
+   if(!(newPassword===confirmPassword)) throw new ApiError("new pasword and confirm is not matched");
+   const user=await User.findById(req.user?._id);
+   // console.log(user);
+   if(!user) throw new ApiError("user not found");
+
+   const passwordChecked= await user.isPasswordCorrect(oldPassword);
+   if(!passwordChecked) {throw new ApiError("Invalid pasword")}
+   user.password=newPassword;
+   await user.save({validateBeforeSave:false})
+
+   return res.status(200).json(
+      new ApiResponse(200,{},"password update successfully")
+   )
+})
+
 export  {registerUser,
          loginUser,
          logoutUser,
-         RefreshAccessToken
+         RefreshAccessToken,
+         changeUsersPassword
 };
